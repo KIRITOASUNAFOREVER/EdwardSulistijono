@@ -32,6 +32,64 @@ data* push(data* node,int number)
 	return node;
 }
 
+void search(data **node, int number){
+	//jika pointer current memiliki data
+	if((*node)!=NULL){
+		//cek, apakah datanya lebih kecil. Jika iya, belok ke kiri
+		if(number<(*node)->number){
+			search(&(*node)->left,number);
+		//jika lebih besar, maka belok ke kanan
+		}else if(number>(*node)->number){
+			search(&(*node)->right,number);
+		//jika sama dengan, maka angka ketemu
+		}else{
+			printf("Angka %d ditemukan dalam Data", (*node)->number);
+		}
+	//jika tidak ada data lagi (not found)
+	}else{
+		printf("Tidak Ditemukan.");
+	}
+}
+
+data * minValueNode(data* node) 
+{ 
+    data* current = node; 
+    while (current && current->left != NULL) 
+        current = current->left; 
+  
+    return current; 
+} 
+
+data* deleteNode(data* node, int number) 
+{ 
+    if (node == NULL) return node; 
+    if (number < node->number) 
+        node->left = deleteNode(node->left, number); 
+  
+    else if (number > node->number) 
+        node->right = deleteNode(node->right, number); 
+  
+    else
+    { 
+        if (node->left == NULL) 
+        { 
+            data *temp = node->right; 
+            free(node); 
+            return temp; 
+        } 
+        else if (root->right == NULL) 
+        { 
+            data *temp = node->left; 
+            free(node); 
+            return temp; 
+        } 
+        data* temp = minValueNode(node->right); 
+        node->number = temp->number; 
+        node->right = deleteNode(node->right, temp->number); 
+    } 
+    return node; 
+} 
+
 void preOrder(data *node) 
 {
 	if(node==NULL)
@@ -88,7 +146,9 @@ int main()
 		printf("2. View Preorder\n");
 		printf("3. View Inorder\n");
 		printf("4. View Postorder\n");
-		printf("5. Exit\n");
+		printf("5. Cari Data\n");
+		printf("6. Delete Data\n");
+		printf("7. Exit\n");
 		printf("choose : ");
 		scanf("%d",&choose);fflush(stdin);
 		
@@ -116,7 +176,17 @@ int main()
 				printf("Press Enter to Continue...");
 				getchar();
 				break;
+			case 5:
+			    printf("Masukkan Angka yang ingin dicari : ");
+			    scanf("%d",&number);fflush(stdin);
+			    search(&root,number);getchar();
+			    break;
+			case 6:
+			    printf("Masukkan Angka yang ingin dihapus : ");
+			    scanf("%d",&number);fflush(stdin);
+			    deleteNode(root,number);
+			    break;
 		}
-	}while(choose!=5);
+	}while(choose!=7);
 	
 }
