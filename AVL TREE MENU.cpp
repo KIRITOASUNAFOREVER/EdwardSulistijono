@@ -15,7 +15,6 @@ int getMax (int height1, int height2){
 	}
 }
 
-
 int getHeight(Tree *curr){
 	if (curr==NULL){
 		return 0;
@@ -114,7 +113,7 @@ struct Tree *deleteNode(Tree *curr, int value){
 	}
 	else{
 		Tree *temp = NULL;
-		if (curr->left ==NULL || curr->right==NULL){ // 1 child ato ga ada
+		if (curr->left ==NULL || curr->right==NULL){ // 1 CHILD OR NO CHILD
 			if (curr->left==NULL){
 				temp = curr->right;
 			}
@@ -122,15 +121,15 @@ struct Tree *deleteNode(Tree *curr, int value){
 				temp = curr->left;
 			}
 			
-			if (temp==NULL){ // ga ada child
+			if (temp==NULL){ // NO CHILD
 				temp=curr;
 				curr=NULL;
-			}else{ // punya 1 child
+			}else{ // HAVE 1 CHILD
 				*curr = *temp;
 			}
 			free(temp);
 		}
-		else{ // punya 2 child
+		else{ // HAVE 2 CHILD
 			temp = preDecessor(curr);
 			curr->key = temp->key;
 			curr->left = deleteNode(curr->left, temp->key);
@@ -164,7 +163,7 @@ struct Tree *deleteNode(Tree *curr, int value){
 	
 	return curr;
 }
-void preOrder(Tree *curr){ // Tengah Left Right
+void preOrder(Tree *curr){
 	if(curr!=NULL){
 		printf("%d ", curr->key);
 		preOrder(curr->left);
@@ -172,7 +171,7 @@ void preOrder(Tree *curr){ // Tengah Left Right
 	}
 }
 
-void inOrder(Tree *curr) //KIRI TENGAH KANAN
+void inOrder(Tree *curr) 
 {
     if(curr!=NULL)
     {
@@ -182,7 +181,7 @@ void inOrder(Tree *curr) //KIRI TENGAH KANAN
     }
 }
 
-void postOrder(Tree *curr) //KIRI KANAN TENGAH
+void postOrder(Tree *curr) 
 {
     if(curr!=NULL)
     {
@@ -190,6 +189,25 @@ void postOrder(Tree *curr) //KIRI KANAN TENGAH
         postOrder(curr->right);
         printf("%d ",curr->key);
     }
+}
+
+struct Tree *search(Tree **node, int value){
+	//jika pointer current memiliki data
+	if((*node)!=NULL){
+		//cek, apakah datanya lebih kecil. Jika iya, belok ke kiri
+		if(value<(*node)->key){
+			search(&(*node)->left,value);
+		//jika lebih besar, maka belok ke kanan
+		}else if(value>(*node)->key){
+			search(&(*node)->right,value);
+		//jika sama dengan, maka angka ketemu
+		}else{
+			printf("Angka %d ditemukan dalam Data", (*node)->key);
+		}
+	//jika tidak ada data lagi (not found)
+	}else{
+		printf("Tidak Ditemukan.");
+	}
 }
 void menu(){
     system("cls");
@@ -229,7 +247,8 @@ int main(){
     	printf("===========\n");
     	puts("1. Insert");
     	puts("2. Delete");
-    	puts("3. Exit");
+    	puts("3. Search");
+    	puts("4. Exit");
     	printf("Choose >> ");
         scanf("%d",&choose);
         
@@ -243,11 +262,17 @@ int main(){
                 break;
             case 2:
                 printf("Menu Delete\n");
-    			printf("Input Number delete : ");
+    			printf("Input Number to be Delete : ");
     			scanf("%d" , &inputNumber);fflush(stdin);
     			root = deleteNode(root , inputNumber);
                 break;
+            case 3:
+                printf("Menu Searching\n");
+                printf("Input Number to be Searched : ");
+                scanf("%d",&inputNumber);fflush(stdin);
+                search(&root,inputNumber);getchar();
+                break;
         }
-    }while(choose != 3);
+    }while(choose != 4);
 	return 0;
 }
