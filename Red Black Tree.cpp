@@ -1,505 +1,466 @@
 #include<stdio.h>
+#include<stdlib.h>
 
-struct node
-{
-    int key;
-    node *parent;
-    char color;
-    node *left;
-    node *right;
-};
-class RBtree
-{
-      node *root;
-      node *q;
-   public :
-      RBtree()
-      {
-              q=NULL;
-              root=NULL;
-      }
-      void insert();
-      void insertfix(node *);
-      void leftrotate(node *);
-      void rightrotate(node *);
-      void del();
-      node* successor(node *);
-      void delfix(node *);
-      void disp();
-      void display( node *);
-      void search();
-};
-void RBtree::insert()
-{
-     int z,i=0;
-     printf("\nEnter key of the node to be inserted: ");
-     scanf("%d",&z);;
-     node *p,*q;
-     node *t=new node;
-     t->key=z;
-     t->left=NULL;
-     t->right=NULL;
-     t->color='r';
-     p=root;
-     q=NULL;
-     if(root==NULL)
-     {
-           root=t;
-           t->parent=NULL;
-     }
-     else
-     {
-         while(p!=NULL)
-         {
-              q=p;
-              if(p->key<t->key)
-                  p=p->right;
-              else
-                  p=p->left;
-         }
-         t->parent=q;
-         if(q->key<t->key)
-              q->right=t;
-         else
-              q->left=t;
-     }
-     insertfix(t);
-}
-void RBtree::insertfix(node *t)
-{
-     node *u;
-     if(root==t)
-     {
-         t->color='b';
-         return;
-     }
-     while(t->parent!=NULL&&t->
+struct rbtNode{ 
+	int key;
+	char color;
+	struct rbtNode *left, *right,*parent;
+}; 
 
-parent->color=='r')
-     {
-           node *g=t->parent->parent;
-           if(g->left==t->parent)
-           {
-                        if(g->right!=NULL)
-                        {
-                              u=g->right;
-                              if(u->color=='r')
-                              {
-                                   t->parent->color='b';
-                                   u->color='b';
-                                   g->color='r';
-                                   t=g;
-                              }
-                        }
-                        else
-                        {
-                            if(t->parent->right==t)
-                            {
-                                 t=t->parent;
-                                 leftrotate(t);
-                            }
-                            t->parent->color='b';
-                            g->color='r';
-                            rightrotate(g);
-                        }
-           }
-           else
-           {
-                        if(g->left!=NULL)
-                        {
-                             u=g->left;
-                             if(u->color=='r')
-                             {
-                                  t->parent->color='b';
-                                  u->color='b';
-                                  g->color='r';
-                                  t=g;
-                             }
-                        }
-                        else
-                        {
-                            if(t->parent->left==t)
-                            {
-                                   t=t->parent;
-                                   rightrotate(t);
-                            }
-                            t->parent->color='b';
-                            g->color='r';
-                            leftrotate(g);
-                        }
-           }
-           root->color='b';
-     }
+struct rbtNode* root = NULL;
+
+void leftRotate(struct rbtNode *x){ 
+	struct rbtNode *y;
+	y = x->right; x->right = y->left;
+	if( y->left != NULL)
+	{ 
+		y->left->parent = x;
+	}
+	y->parent = x->parent;
+	if( x->parent == NULL){ 
+		root = y;
+	}
+	else if((x->parent->left!=NULL) && (x->key == x->parent->left->key))
+	{ 
+		x->parent->left = y;
+	}
+	else x->parent->right = y;
+	y->left = x; x->parent = y; return;
 }
 
-void RBtree::del()
-{
-     if(root==NULL)
-     {
-           printf("\nEmpty Tree.");
-           return ;
-     }
-     int x;
-     printf("\nEnter the key of the node to be deleted: ");
-     scanf("%d",&x);
-     node *p;
-     p=root;
-     node *y=NULL;
-     node *q=NULL;
-     int found=0;
-     while(p!=NULL&&found==0)
-     {
-           if(p->key==x)
-               found=1;
-           if(found==0)
-           {
-                 if(p->key<x)
-                    p=p->right;
-                 else
-                    p=p->left;
-           }
-     }
-     if(found==0)
-     {
-            printf("\nElement Not Found.");
-            return ;
-     }
-     else
-     {
-         printf("\nDeleted Element: %d",p->key);
-         printf("\nColour: ");
-         if(p->color=='b')
-     printf("Black\n");
-    else
-      printf("Red\n");
-
-         if(p->parent!=NULL)
-               printf("\nParent %d",p->parent->key);
-         else
-               printf("nThere is no parent of the node. ");
-         if(p->right!=NULL)
-               printf("\nRight Child: %d",p->right->key);
-         else
-               printf("\nThere is no right child of the node. ");
-         if(p->left!=NULL)
-               printf("\nLeft Child: %d",p->left->key);
-         else
-               printf("\nThere is no left child of the node. ");
-         printf("\nNode Deleted.");
-         if(p->left==NULL||p->right==NULL)
-              y=p;
-         else
-              y=successor(p);
-         if(y->left!=NULL)
-              q=y->left;
-         else
-         {
-              if(y->right!=NULL)
-                   q=y->right;
-              else
-                   q=NULL;
-         }
-         if(q!=NULL)
-              q->parent=y->parent;
-         if(y->parent==NULL)
-              root=q;
-         else
-         {
-             if(y==y->parent->left)
-                y->parent->left=q;
-             else
-                y->parent->right=q;
-         }
-         if(y!=p)
-         {
-             p->color=y->color;
-             p->key=y->key;
-         }
-         if(y->color=='b')
-             delfix(q);
-     }
+void rightRotate(struct rbtNode *y){ 
+	struct rbtNode *x;
+	x = y->left; 
+	y->left = x->right;
+	if ( x->right != NULL)
+	{ 
+		x->right->parent = y;	
+	}
+	x->parent = y->parent;
+	if( y->parent == NULL)
+	{ 
+		root = x;
+	}
+	else if((y->parent->left!=NULL)&& (y->key == y->parent->left->key))
+	{ 
+		y->parent->left = x;
+	}	
+	else
+	y->parent->right = x;
+	x->right = y; y->parent = x;
+	return;
+}
+void colorinsert(struct rbtNode *z){ 
+	struct rbtNode *y=NULL;
+	while ((z->parent != NULL) && (z->parent->color == 'r'))
+	{
+		if ((z->parent->parent->left != NULL) && (z->parent->key == z->parent->parent->left->key))
+		{ 
+			if(z->parent->parent->right!=NULL)
+				y = z->parent->parent->right;
+			if ((y!=NULL) && (y->color == 'r'))
+			{ 
+				z->parent->color = 'b';
+				y->color = 'b';
+				z->parent->parent->color = 'r';
+				if(z->parent->parent!=NULL)
+					z = z->parent->parent;
+			}
+			else
+			{
+				if ((z->parent->right != NULL) && (z->key == z->parent->right->key))
+				{ 
+					z = z->parent;
+					leftRotate(z);
+				}
+				z->parent->color = 'b';
+				z->parent->parent->color = 'r';
+				rightRotate(z->parent->parent);
+			}
+		}
+		else
+		{
+			if(z->parent->parent->left!=NULL)
+				y = z->parent->parent->left;
+			if ((y!=NULL) && (y->color == 'r'))
+			{ 
+				z->parent->color = 'b';
+				y->color = 'b';
+				z->parent->parent->color = 'r';
+				if(z->parent->parent!=NULL)
+					z = z->parent->parent;
+			}
+			else
+			{
+				if ((z->parent->left != NULL) && (z->key == z->parent->left->key))
+				{ 
+					z = z->parent;
+					rightRotate(z);
+				}
+				z->parent->color = 'b';
+				z->parent->parent->color = 'r';
+				leftRotate(z->parent->parent);
+			}
+		}
+	} 
+	root->color = 'b';
 }
 
-void RBtree::delfix(node *p)
-{
-    node *s;
-    while(p!=root&&p->color=='b')
-    {
-          if(p->parent->left==p)
-          {
-                  s=p->parent->right;
-                  if(s->color=='r')
-                  {
-                         s->color='b';
-                         p->parent->color='r';
-                         leftrotate(p->parent);
-                         s=p->parent->right;
-                  }
-                  if(s->right->color=='b'&&s->left->color=='b')
-                  {
-                         s->color='r';
-                         p=p->parent;
-                  }
-                  else
-                  {
-                      if(s->right->color=='b')
-                      {
-                             s->left->color=='b';
-                             s->color='r';
-                             rightrotate(s);
-                             s=p->parent->right;
-                      }
-                      s->color=p->parent->color;
-                      p->parent->color='b';
-                      s->right->color='b';
-                      leftrotate(p->parent);
-                      p=root;
-                  }
-          }
-          else
-          {
-                  s=p->parent->left;
-                  if(s->color=='r')
-                  {
-                        s->color='b';
-                        p->parent->color='r';
-                        rightrotate(p->parent);
-                        s=p->parent->left;
-                  }
-                  if(s->left->color=='b'&&s->right->color=='b')
-                  {
-                        s->color='r';
-                        p=p->parent;
-                  }
-                  else
-                  {
-                        if(s->left->color=='b')
-                        {
-                              s->right->color='b';
-                              s->color='r';
-                              leftrotate(s);
-                              s=p->parent->left;
-                        }
-                        s->color=p->parent->color;
-                        p->parent->color='b';
-                        s->left->color='b';
-                        rightrotate(p->parent);
-                        p=root;
-                  }
-          }
-       p->color='b';
-       root->color='b';
-    }
+
+
+void inorderTree(struct rbtNode* root){ 
+	struct rbtNode* temp = root;
+	if (temp != NULL)
+	{ 
+		inorderTree(temp->left);
+		printf(" %d-%c ",temp->key,temp->color);
+		inorderTree(temp->right);
+	}
+	return;
 }
 
-void RBtree::leftrotate(node *p)
-{
-     if(p->right==NULL)
-           return ;
-     else
-     {
-           node *y=p->right;
-           if(y->left!=NULL)
-           {
-                  p->right=y->left;
-                  y->left->parent=p;
-           }
-           else
-                  p->right=NULL;
-           if(p->parent!=NULL)
-                y->parent=p->parent;
-           if(p->parent==NULL)
-                root=y;
-           else
-           {
-               if(p==p->parent->left)
-                       p->parent->left=y;
-               else
-                       p->parent->right=y;
-           }
-           y->left=p;
-           p->parent=y;
-     }
-}
-void RBtree::rightrotate(node *p)
-{
-     if(p->left==NULL)
-          return ;
-     else
-     {
-         node *y=p->left;
-         if(y->right!=NULL)
-         {
-                  p->left=y->right;
-                  y->right->parent=p;
-         }
-         else
-                 p->left=NULL;
-         if(p->parent!=NULL)
-                 y->parent=p->parent;
-         if(p->parent==NULL)
-               root=y;
-         else
-         {
-             if(p==p->parent->left)
-                   p->parent->left=y;
-             else
-                   p->parent->right=y;
-         }
-         y->right=p;
-         p->parent=y;
-     }
+void postorderTree(struct rbtNode* root){ 
+	struct rbtNode* temp = root;
+	if (temp != NULL)
+	{ 
+		postorderTree(temp->left);
+		postorderTree(temp->right);
+		printf(" %d-%c ",temp->key,temp->color);
+	}
+	return;
 }
 
-node* RBtree::successor(node *p)
+void preorderTree(struct rbtNode* root)
 {
-      node *y=NULL;
-     if(p->left!=NULL)
+	struct rbtNode *temp = root;
+	if(temp != NULL)
+	{
+		printf(" %d-%c ",temp->key,temp->color);
+		preorderTree(temp->left);
+		preorderTree(temp->right);
+	}
+	return;
+}
+
+void traversal(struct rbtNode* root){ 
+	if (root != NULL)
+	{ 
+		printf("root is %d- %c",root->key,root->color);
+		printf("\nInorder tree traversal\n");
+		inorderTree(root);
+		printf("\npostorder tree traversal\n");
+		postorderTree(root);
+		printf("\npreorder tree traversal\n");
+		preorderTree(root);
+	}
+	return;
+}
+
+int search(int val){ 
+	struct rbtNode* temp = root;
+	int diff;
+	while (temp != NULL)
+	{ 
+		diff = val - temp->key;
+		if (diff > 0)
+		{ 
+			temp = temp->right;
+		}
+		else if (diff < 0)
+		{ 
+			temp = temp->left;
+		}
+		else
+		{ 
+			printf("Search Element Found!!\n");
+			return 1;
+		}
+	} 
+	//printf("Given Data Not Found in RB Tree!!\n");
+	return 0;
+}
+void insert(int val){ 
+	struct rbtNode *x, *y;
+	struct rbtNode *z = (struct rbtNode*)malloc(sizeof(struct rbtNode));
+	z->key = val;
+	z->left = NULL;
+	z->right = NULL;
+	z->color = 'r';
+	x=root;
+	if(search(val)==1)
+	{ 
+		printf("\nEntered element already exists in the tree\n");
+		return;
+	}
+	if ( root == NULL )
+	{ 
+		root = z;
+		root->color = 'b';
+		return;
+	}
+	while ( x != NULL)
+	{ 
+		y = x;
+		if ( z->key < x->key)
+		{ 
+			x = x->left;
+		}
+		else 
+			x = x->right;
+	}
+	z->parent = y;
+	if ( y == NULL)
+	{ 
+		root = z;
+	}
+	else if( z->key < y->key )
+	{ 
+		y->left = z;
+	}
+	else{
+		y->right = z;
+	} 
+		
+	colorinsert(z);
+	return;
+}
+
+struct rbtNode* min(struct rbtNode *x){ 
+	while (x->left)
+	{ 
+		x = x->left;
+	} 
+	return x;
+}
+
+struct rbtNode* successor(struct rbtNode *x){ 
+	struct rbtNode *y=NULL;
+     if(x->left!=NULL)
      {
-         y=p->left;
+         y=x->left;
          while(y->right!=NULL)
               y=y->right;
      }
      else
      {
-         y=p->right;
+         y=x->right;
          while(y->left!=NULL)
               y=y->left;
      }
      return y;
 }
 
-void RBtree::disp()
-{
-     display(root);
+void colordelete(struct rbtNode *x){ 
+	while (x != root && x->color == 'b')
+	{ 
+		struct rbtNode *w = NULL;
+		if ((x->parent->left!=NULL) && (x == x->parent->left))
+		{ 
+			w = x->parent->right;
+			if ((w!=NULL) && (w->color == 'r'))
+			{ 
+				w->color = 'b';
+				x->parent->color = 'r';
+				leftRotate(x->parent);
+				w = x->parent->right;
+			}
+			if ((w!=NULL) && (w->right!=NULL) && (w->left!=NULL) && (w->left->color == 'b') && (w->right->color == 'b'))
+			{
+				w->color = 'r';
+				x = x->parent;
+			}
+			else if((w!=NULL) && (w->right->color == 'b'))
+			{ 
+				w->left->color = 'b';
+				w->color = 'r';
+				rightRotate(w);
+				w = x->parent->right;
+			}
+			if(w!=NULL)
+			{ 
+				w->color = x->parent->color;
+				x->parent->color = 'b';
+				w->right->color = 'b';
+				leftRotate(x->parent);
+				x = root;
+			}
+		}
+		else if(x->parent!=NULL)
+		{ 
+			w = x->parent->left;
+			if ((w!=NULL) && (w->color == 'r'))
+			{
+				w->color = 'b';
+				x->parent->color = 'r';
+				leftRotate(x->parent);
+				if(x->parent!=NULL){
+					w = x->parent->left;
+				}
+			}
+			if ((w!=NULL) && (w->right!=NULL) && (w->left!=NULL) && (w->right->color == 'b') && (w->left->color == 'b'))
+			{
+				x = x->parent;
+			}
+			else if((w!=NULL) && (w->right!=NULL) && (w->left!=NULL) && (w->left->color == 'b'))
+			{
+				w->right->color = 'b';
+				w->color = 'r';
+				rightRotate(w);
+				w = x->parent->left;
+			}
+			if(x->parent!=NULL)
+			{ 
+				w->color = x->parent->color;
+				x->parent->color = 'b';
+			}
+			if(w->left!=NULL)
+				w->left->color = 'b';
+			if(x->parent !=NULL){
+				leftRotate(x->parent);
+			}
+			x = root;
+		}
+	}
+	x->color = 'b';
 }
-void RBtree::display(node *p)
-{
-     if(root==NULL)
-     {
-          printf("\nEmpty Tree.");
-          return ;
-     }
-     if(p!=NULL)
-     {
-                printf("\n\t NODE: ");
-                printf("\n Key: %d",p->key);
-                printf("\n Colour: ");
-    if(p->color=='b')
-     printf("Black");
-    else
-     printf("Red");
-                if(p->parent!=NULL)
-                       printf("\nParent: %d",p->parent->key);
-                else
-                       printf("nThere is no parent of the node. ");
-                if(p->right!=NULL)
-                       printf("\nRight Child: %d",p->right->key);
-                else
-                       printf("\nThere is no right child of the node. ");
-                if(p->left!=NULL)
-                       printf("\nLeft Child: %d",p->left->key);
-                else
-                       printf("\nThere is no left child of the node. ");
-                printf("\n");
-    if(p->left)
-    {
-        printf("\n\nLeft:\n");
-        display(p->left);
-    }
-    /*else
-     cout<<"\nNo Left Child.\n";*/
-    if(p->right)
-    {
-        printf("\n\nRight:\n");
-        display(p->right);
-    }
-    /*else
-     cout<<"\nNo Right Child.\n"*/
-     }
-}
-void RBtree::search()
-{
-     if(root==NULL)
-     {
-           printf("\nEmpty Tree\n");
-           return ;
-     }
-     int x;
-     printf("\n Enter key of the node to be searched: ");
-     scanf("%d",&x);
-     node *p=root;
-     int found=0;
-     while(p!=NULL&& found==0)
-     {
-            if(p->key==x)
-                found=1;
-            if(found==0)
-            {
-                 if(p->key<x)
-                      p=p->right;
-                 else
-                      p=p->left;
-            }
-     }
-     if(found==0)
-          printf("\nElement Not Found.");
-     else
-     {
-                printf("\n\t FOUND NODE: ");
-                printf("\n Key: %d",p->key);
-                printf("\n Colour: ");
-    if(p->color=='b')
-     printf("Black");
-    else
-     printf("Red");
-                if(p->parent!=NULL)
-                       printf("\nParent: %d",p->parent->key);
-                else
-                       printf("nThere is no parent of the node. ");
-                if(p->right!=NULL)
-                       printf("\nRight Child: %d",p->right->key);
-                else
-                       printf("\nThere is no right child of the node. ");
-                if(p->left!=NULL)
-                       printf("\nLeft Child: %d",p->left->key);
-                else
-                       printf("\nThere is no left child of the node. ");
-                printf("\n");
 
-     }
+struct rbtNode* deleteNode(int var){ 
+	struct rbtNode *x = NULL, *y = NULL, *z;
+	z=root;
+	
+	if((z->left ==NULL ) &&(z->right==NULL) && (z->key==var))
+	{ 
+		root=NULL;
+		printf("\nRBTREE is empty\n");
+		return 0;
+	}
+	while(z->key !=var && z!=NULL)
+	{ 
+		if(var < z->key){
+			z=z->left;
+		}
+		else{
+			z=z->right;
+		}
+		if(z== NULL)
+			return 0;
+	}
+	if((z->left==NULL)||(z->right==NULL))
+	{ 
+		y = z;
+	}
+	else
+	{ 
+		y = successor(z);
+	}
+	if (y->left!=NULL)
+	{ 
+		x = y->left;
+	}
+	else
+	{ 
+		if(y->right !=NULL){
+			x = y->right;
+		}
+	}
+	if((x!=NULL) && (y->parent !=NULL)){
+		x->parent = y->parent;
+	}
+	if ((y !=NULL) && (x!=NULL) && (y->parent==NULL))
+	{ 
+		root=x;	
+	}
+	else if (y == y->parent->left)
+	{ 
+		y->parent->left = x;
+	}
+	else
+	{ 
+		y->parent->right = x;
+	}
+	if (y != z)
+	{ 
+		z->key = y->key;
+	}
+	if ((y!=NULL) && (x!=NULL) && (y->color == 'b'))
+	{ 
+		colordelete(x);
+	}
+	return y;
 }
-int main()
-{
-    int ch,y=0;
-    RBtree obj;
-    do
+
+void printTree(struct rbtNode *root, int space) 
+{ 
+    if (root == NULL) 
     {
-                printf("\n\t RED BLACK TREE Menu");
-                printf("\n 1. Insert in the tree ");
-                printf("\n 2. Delete a node from the tree");
-                printf("\n 3. Search for an element in the tree");
-                printf("\n 4. Display the tree ");
-                printf("\n 5. Exit ");
-                printf("\nEnter Your Choice: ");
-                scanf("%d",&ch);
-                switch(ch)
-                {
-                          case 1 : obj.insert();
-                                   printf("\nNode Inserted.\n");getchar();
-                                   break;
-                          case 2 : obj.del();getchar();
-                                   break;
-                          case 3 : obj.search();getchar();
-                                   break;
-                          case 4 : obj.disp();getchar();
-                                   break;
-                          case 5 : y=1;
-                                   break;
-                          default : printf("\nEnter a Valid Choice.");getchar();
-                }
-                getchar();
-                printf("\n");
-    }while(y!=1);
-    return 1;
+        return;
+    }
+    
+    else
+    {
+//        printf("\n"); 
+        space += 8; 
+    printTree(root->right, space); 
+    printf("\n"); 
+    for (int i = 8; i < space; i++) 
+        printf(" "); 
+    printf("%d(%c)", root->key,root->color); 
+    printTree(root->left, space);
+    }
+} 
+  
+void print(struct rbtNode *root) 
+{ 
+if(root==NULL)
+{
+    printf("No Data");
+}
+else
+{
+    printTree(root, 0); 
+}
+}
+int main(){
+	int choice,val,data,var,fl=0;
+	while(1)
+	{ 
+		system("cls");
+		print(root);
+		printf("\nRed Black Tree Menu - \nEnter your choice :\n1:Insert \n2:Delete \n3:Search \n4:Traversal \n5:Exit\n");
+		scanf("%d",&choice);fflush(stdin);
+		switch(choice)
+		{ 
+			case 1:
+				printf("Enter the integer you want to add : ");
+				scanf("%d",&val);fflush(stdin);
+				insert(val);
+				//getchar();
+			break;
+			case 2:
+				printf("Enter the integer you want to delete : ");
+				scanf("%d",&val);fflush(stdin);
+				deleteNode(val);
+				//getchar();
+			break;
+			case 3:
+				printf("Enter search element \n");
+				scanf("%d",&val);fflush(stdin);
+				search(val);
+				//getchar();
+			break;
+			case 4:
+				traversal(root);
+				//print(root);
+				getchar();
+			break;
+			case 5:
+				fl=1;
+			break;
+			default:
+				printf("\nInvalid Choice\n");
+		}
+		if(fl==1){ 
+			break;}
+		}
+	return 0;
 }
